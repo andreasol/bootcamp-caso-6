@@ -9,7 +9,11 @@
     "lint": "eslint",
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "db:push": "node scripts/db-push.mjs",
+    "db:seed": "tsx scripts/seed.ts",
+    "db:pipeline": "tsx scripts/pipeline.ts",
+    "db:reset": "npm run db:push && npm run db:seed && npm run db:pipeline"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
@@ -18,6 +22,7 @@
     "next": "16.4.0",
     "react": "19.3.0",
     "react-dom": "19.3.0",
+    "server-only": "^0.0.1",
     "zod": "^4.6.5"
   },
   "devDependencies": {
@@ -27,6 +32,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.4.0",
+    "supabase": "^2.120.0",
     "tailwindcss": "^4",
     "tsx": "^4.23.15",
     "typescript": "^5",
