@@ -9,7 +9,7 @@ const pw = encodeURIComponent(process.env.SUPABASE_DB_PASSWORD ?? "");
 const dbUrl = `postgresql://postgres:${pw}@db.${ref}.supabase.co:5432/postgres`;
 
 const extra = process.argv.slice(2);
-const res = spawnSync("npx", ["supabase", "db", "push", "--db-url", dbUrl, ...extra], {
+const res = spawnSync("npx", ["supabase", "db", "push", "--yes", "--db-url", dbUrl, ...extra], {
   stdio: "inherit",
   shell: true,
 });

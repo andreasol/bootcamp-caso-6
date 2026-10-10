@@ -1,0 +1,178 @@
+{
+  "seed": 20261010,
+  "periods": [
+    "2026-08-01",
+    "2026-09-01"
+  ],
+  "discrepancies": [
+    {
+      "type": "missing_in_global",
+      "period": "2026-09-01",
+      "countryCode": "CL",
+      "employeeGlobalId": "G-000031",
+      "concept": "base_salary",
+      "sourceSystemCode": null,
+      "note": "Pago local sin registro global (alta no sincronizada)"
+    },
+    {
+      "type": "missing_in_global",
+      "period": "2026-09-01",
+      "countryCode": "CL",
+      "employeeGlobalId": "G-000032",
+      "concept": "base_salary",
+      "sourceSystemCode": null,
+      "note": "Pago local sin registro global (alta no sincronizada)"
+    },
+    {
+      "type": "amount_mismatch",
+      "period": "2026-09-01",
+      "countryCode": "CL",
+      "employeeGlobalId": "G-000004",
+      "concept": "base_salary",
+      "sourceSystemCode": null,
+      "note": "Monto local difiere en 350000"
+    },
+    {
+      "type": "amount_mismatch",
+      "period": "2026-09-01",
+      "countryCode": "CL",
+      "employeeGlobalId": "G-000012",
+      "concept": "base_salary",
+      "sourceSystemCode": null,
+      "note": "Monto local difiere en 8000"
+    },
+    {
+      "type": "leave_balance_mismatch",
+      "period": "2026-09-01",
+      "countryCode": "CL",
+      "employeeGlobalId": "G-000003",
+      "concept": "leave_balance",
+      "sourceSystemCode": null,
+      "note": "Saldo local difiere en 1 días"
+    },
+    {
+      "type": "leave_balance_mismatch",
+      "period": "2026-09-01",
+      "countryCode": "CL",
+      "employeeGlobalId": "G-000016",
+      "concept": "leave_balance",
+      "sourceSystemCode": null,
+      "note": "Saldo local difiere en 10 días"
+    },
+    {
+      "type": "leave_balance_mismatch",
+      "period": "2026-09-01",
+      "countryCode": "CL",
+      "employeeGlobalId": "G-000021",
+      "concept": "leave_balance",
+      "sourceSystemCode": null,
+      "note": "Saldo local difiere en 2.5 días"
+    },
+    {
+      "type": "amount_mismatch",
+      "period": "2026-09-01",
+      "countryCode": "PE",
+      "employeeGlobalId": "G-000065",
+      "concept": "base_salary",
+      "sourceSystemCode": null,
+      "note": "Monto local difiere en -900"
+    },
+    {
+      "type": "amount_mismatch",
+      "period": "2026-09-01",
+      "countryCode": "PE",
+      "employeeGlobalId": "G-000070",
+      "concept": "base_salary",
+      "sourceSystemCode": null,
+      "note": "Monto local difiere en 35"
+    },
+    {
+      "type": "amount_mismatch",
+      "period": "2026-09-01",
+      "countryCode": "MX",
+      "employeeGlobalId": "G-000112",
+      "concept": "base_salary",
+      "sourceSystemCode": null,
+      "note": "Monto local difiere en 2500"
+    },
+    {
+      "type": "missing_file",
+      "period": "2026-09-01",
+      "countryCode": "MX",
+      "employeeGlobalId": null,
+      "concept": null,
+      "sourceSystemCode": "mx_nomina_leave",
+      "note": "El archivo de vacaciones local no llegó"
+    },
+    {
+      "type": "missing_in_local",
+      "period": "2026-09-01",
+      "countryCode": "MX",
+      "employeeGlobalId": "G-000116",
+      "concept": "base_salary",
+      "sourceSystemCode": null,
+      "note": "Registro global sin contraparte local (baja no informada)"
+    },
+    {
+      "type": "missing_in_local",
+      "period": "2026-09-01",
+      "countryCode": "PE",
+      "employeeGlobalId": "G-000073",
+      "concept": "base_salary",
+      "sourceSystemCode": null,
+      "note": "Registro global sin contraparte local (baja no informada)"
+    }
+  ],
+  "quarantine": [
+    {
+      "sourceSystemCode": "cl_remu_pay",
+      "sourceRecordId": "cl_remu_pay/2026-09/L0089",
+      "reason": "unmapped_employee",
+      "note": "Código local sin equivalencia global"
+    },
+    {
+      "sourceSystemCode": "cl_remu_pay",
+      "sourceRecordId": "cl_remu_pay/2026-09/L0090",
+      "reason": "unmapped_employee",
+      "note": "Código local sin equivalencia global"
+    },
+    {
+      "sourceSystemCode": "pe_planilla_pay",
+      "sourceRecordId": "pe_planilla_pay/2026-09/L0060",
+      "reason": "unmapped_employee",
+      "note": "Código local sin equivalencia global"
+    },
+    {
+      "sourceSystemCode": "mx_nomina_pay",
+      "sourceRecordId": "mx_nomina_pay/2026-09/L0028",
+      "reason": "unmapped_country",
+      "note": "Código de país desconocido"
+    },
+    {
+      "sourceSystemCode": "mx_nomina_pay",
+      "sourceRecordId": "mx_nomina_pay/2026-09/L0038",
+      "reason": "invalid_date",
+      "note": "Fecha en formato ISO en vez de DD/MM/YYYY"
+    },
+    {
+      "sourceSystemCode": "mx_nomina_pay",
+      "sourceRecordId": "mx_nomina_pay/2026-09/L0039",
+      "reason": "invalid_date",
+      "note": "Fecha en formato ISO en vez de DD/MM/YYYY"
+    },
+    {
+      "sourceSystemCode": "mx_nomina_pay",
+      "sourceRecordId": "mx_nomina_pay/2026-09/L0040",
+      "reason": "invalid_date",
+      "note": "Fecha en formato ISO en vez de DD/MM/YYYY"
+    }
+  ],
+  "belowThreshold": [
+    {
+      "period": "2026-09-01",
+      "employeeGlobalId": "G-000006",
+      "concept": "base_salary",
+      "note": "Diferencia bajo umbral absoluto y porcentual"
+    }
+  ]
+}
