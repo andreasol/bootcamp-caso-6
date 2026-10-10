@@ -1,4 +1,4 @@
-// Simple, documented rules (docs/specs/fase-1/design.md). Used as the queue order and as
+// Simple, documented rules (docs/design.md §2). Used as the queue order and as
 // the fallback whenever the AI ranking is unavailable or invalid.
 import type { DiscrepancyType, Unit } from "@/lib/domain/types";
 
