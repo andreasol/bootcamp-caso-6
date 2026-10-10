@@ -43,3 +43,6 @@ next-env.d.ts
 
 # generated seed data (reproducible with npm run db:reset)
 /seed/data/
+
+# supabase cli cache
+/supabase/.temp/
