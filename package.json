@@ -13,7 +13,8 @@
     "db:push": "node scripts/db-push.mjs",
     "db:seed": "tsx scripts/seed.ts",
     "db:pipeline": "tsx scripts/pipeline.ts",
-    "db:reset": "npm run db:push && npm run db:seed && npm run db:pipeline"
+    "db:reset": "npm run db:push && npm run db:seed && npm run db:pipeline",
+    "db:users": "tsx scripts/create-test-users.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
