@@ -3,7 +3,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
-const PUBLIC_PATHS = ["/login"];
+const PUBLIC_PATHS = ["/login", "/signup"];
 
 // Names only, never values: tells whoever deploys which variable this environment lacks.
 function missingEnv(): string[] {

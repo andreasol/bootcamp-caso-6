@@ -1,6 +1,7 @@
 import { LogOut } from "lucide-react";
 import { signOut } from "@/lib/auth/actions";
 import { ROLE_LABEL } from "@/lib/format";
+import { NavLinks } from "./NavLinks";
 import type { CurrentProfile } from "@/services/profile";
 
 function scopeLabel(p: CurrentProfile): string {
@@ -14,7 +15,15 @@ export function AppHeader({ profile, email }: { profile: CurrentProfile | null; 
   return (
     <header className="border-b border-line bg-surface">
       <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-3 md:px-8">
-        <p className="font-display text-base font-bold [font-stretch:87.5%]">Cola de cierre</p>
+        <div className="flex items-center gap-6">
+          <p className="font-display text-base font-bold [font-stretch:87.5%]">Cola de cierre</p>
+          <NavLinks
+            links={[
+              { href: "/queue", label: "Cola" },
+              ...(profile?.role === "admin" ? [{ href: "/admin/users", label: "Usuarios" }] : []),
+            ]}
+          />
+        </div>
         <div className="flex items-center gap-4">
           <div className="text-right text-sm">
             <p className="font-medium">{profile?.fullName ?? email}</p>

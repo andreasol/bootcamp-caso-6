@@ -111,8 +111,8 @@ function NoProfile() {
         <div>
           <h1 className="font-display text-lg font-semibold">Tu cuenta todavía no tiene un rol asignado</h1>
           <p className="mt-2 text-base text-ink-muted">
-            Sin rol ni país asignado no puedes ver ningún registro. Pide al administrador que te asigne un rol (analista,
-            líder regional o gerente global) y tu país o región.
+            Tu cuenta ya existe, pero sin rol no puedes ver ningún registro. Pide al administrador que te asigne un rol
+            (analista, líder regional o gerente global) y tu país o región. Después, recarga esta página.
           </p>
         </div>
       </div>

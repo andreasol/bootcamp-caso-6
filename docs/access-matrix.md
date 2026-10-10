@@ -46,6 +46,9 @@ Ningún usuario escribe tablas directamente: `insert/update/delete` están revoc
 | Operación | Cómo | Control |
 |---|---|---|
 | Cambiar estado de una discrepancia | `rpc review_discrepancy(id, action, comment)` | Revisa el alcance en la función; un ID ajeno se comporta igual que uno inexistente (devuelve `null`) y queda registrado como `denied`. |
+| Listar cuentas | `rpc admin_list_users()` | Solo admin; un no-admin recibe lista vacía y queda `denied` en auditoría. |
+| Asignar o cambiar rol y alcance | `rpc admin_assign_role(user, name, role, country, region)` | Solo admin; nadie puede cambiar su propio rol; valida país para analista y región para líder. |
+| Quitar acceso | `rpc admin_revoke_role(user)` | Solo admin; borra el perfil y la cuenta vuelve a no ver nada. |
 | Registrar auditoría | `rpc log_event(...)` | `user_id` y `role` los pone la función, no quien la llama. |
 | Seed, carga de CSV, adaptador, generación de discrepancias | Scripts locales con `service_role` | Nunca en Vercel ni en el navegador (supuesto A2). |
 | Editar o borrar `audit_log` | Imposible | Un trigger lo bloquea para todos, incluido `service_role`. |
@@ -53,3 +56,7 @@ Ningún usuario escribe tablas directamente: `insert/update/delete` están revoc
 ## Por qué los mapeos y los datos crudos son solo de admin
 
 Antes de pasar por el adaptador, un registro crudo no tiene un país confiable. Las tablas de mapeo listan códigos de todos los países. Mostrarlas a un analista revelaría, por ejemplo, cuántos empleados tiene otro país.
+
+## Alta de cuentas
+
+Cualquiera puede crear una cuenta en `/signup`, pero nace **sin perfil**: puede iniciar sesión y no ve ningún dato (deny by default). Solo un `admin` le asigna rol y alcance desde **Usuarios**. Los jefes (`regional_lead`, `global_manager`) no asignan roles: una sola puerta de entrada, fácil de auditar.

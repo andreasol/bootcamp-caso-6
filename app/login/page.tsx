@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { LoginForm } from "@/components/LoginForm";
 
 export const metadata: Metadata = { title: "Iniciar sesión" };
@@ -21,10 +22,20 @@ export default function LoginPage() {
         <h2 id="login-title" className="font-display text-lg font-semibold">
           Iniciar sesión
         </h2>
-        <p className="mt-1 text-sm text-ink-muted">Usa la cuenta que te asignó el administrador.</p>
+        <p className="mt-1 text-sm text-ink-muted">Entra con tu correo y contraseña.</p>
         <div className="mt-6">
           <LoginForm />
         </div>
+        <p className="mt-6 text-sm text-ink-muted">
+          ¿No tienes cuenta?{" "}
+          <Link
+            href="/signup"
+            className="font-medium text-accent underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-accent"
+          >
+            Crea una
+          </Link>{" "}
+          y pide al administrador que te asigne un rol.
+        </p>
       </section>
     </main>
   );

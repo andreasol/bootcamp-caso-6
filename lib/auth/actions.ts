@@ -33,6 +33,50 @@ export async function signIn(_prev: SignInState, formData: FormData): Promise<Si
   redirect("/queue");
 }
 
+export interface SignUpState {
+  error: string | null;
+  email: string;
+  fullName: string;
+  pendingConfirmation: boolean;
+}
+
+const signUpInput = z.object({
+  fullName: z.string().trim().min(2, "Escribe tu nombre.").max(120),
+  email: z.string().trim().email("Escribe un correo válido."),
+  password: z.string().min(10, "La contraseña debe tener al menos 10 caracteres."),
+});
+
+// New accounts get no profile: they can sign in but see nothing until an admin assigns a role.
+export async function signUp(_prev: SignUpState, formData: FormData): Promise<SignUpState> {
+  const email = String(formData.get("email") ?? "");
+  const fullName = String(formData.get("fullName") ?? "");
+  const parsed = signUpInput.safeParse({ fullName, email, password: formData.get("password") });
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Datos inválidos.", email, fullName, pendingConfirmation: false };
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.signUp({
+    email: parsed.data.email,
+    password: parsed.data.password,
+    options: { data: { full_name: parsed.data.fullName } },
+  });
+  if (error) {
+    const taken = /already|registered|exists/i.test(error.message);
+    return {
+      error: taken ? "Ya existe una cuenta con ese correo. Inicia sesión." : "No pudimos crear la cuenta. Intenta de nuevo.",
+      email,
+      fullName,
+      pendingConfirmation: false,
+    };
+  }
+  // Only happens if email confirmation is enabled in Supabase Auth settings.
+  if (!data.session) return { error: null, email, fullName, pendingConfirmation: true };
+
+  await logEvent(supabase, { action: "sign_up", resource: "auth", result: "allowed" });
+  redirect("/queue");
+}
+
 export async function signOut(): Promise<void> {
   const supabase = await createClient();
   await logEvent(supabase, { action: "sign_out", resource: "auth", result: "allowed" });
