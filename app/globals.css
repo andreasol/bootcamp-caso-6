@@ -1,26 +1,53 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* Design system (approved): palette, two typefaces, fixed type scale 14/16/20/28/40. */
+@theme {
+  --color-ledger: #f2f4f3; /* page background */
+  --color-surface: #ffffff; /* panels and rows */
+  --color-ink: #14212b; /* primary text */
+  --color-ink-muted: #4a5a63; /* secondary text, 6.6:1 on ledger */
+  --color-line: #cdd5d3; /* borders and rules */
+  --color-accent: #1d5aa6; /* actions, focus, links */
+  --color-variance: #a8321c; /* only for values beyond threshold */
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --font-display: var(--font-archivo), ui-sans-serif, sans-serif;
+  --font-sans: var(--font-plex), ui-sans-serif, sans-serif;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --text-sm: 14px;
+  --text-sm--line-height: 20px;
+  --text-base: 16px;
+  --text-base--line-height: 24px;
+  --text-lg: 20px;
+  --text-lg--line-height: 28px;
+  --text-xl: 28px;
+  --text-xl--line-height: 32px;
+  --text-2xl: 40px;
+  --text-2xl--line-height: 44px;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-ledger);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The single orchestrated motion: variance markers slide out from the global value. */
+@keyframes variance-reveal {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.variance-bar {
+  animation: variance-reveal 600ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .variance-bar {
+    animation: none;
+  }
 }
