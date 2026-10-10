@@ -14,7 +14,8 @@
     "db:seed": "tsx scripts/seed.ts",
     "db:pipeline": "tsx scripts/pipeline.ts",
     "db:reset": "npm run db:push && npm run db:seed && npm run db:pipeline",
-    "db:users": "tsx scripts/create-test-users.ts"
+    "db:users": "tsx scripts/create-test-users.ts",
+    "test:rls": "vitest run --config vitest.rls.config.mts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

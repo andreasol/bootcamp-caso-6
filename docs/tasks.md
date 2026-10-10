@@ -18,7 +18,7 @@ Estado posible: _por confirmar_ = construida y verificada por el agente, falta l
 - [ ] **T5. Registro de cuentas y asignación de roles por admin** (migración 005). _Por confirmar._
   Verificar: una cuenta nueva en `/signup` ve "sin rol"; el admin le asigna un rol en Usuarios y la cuenta pasa a ver su alcance.
 - [ ] **T6. Tests automáticos de RLS por rol** (`tests/rls`, sesiones reales con los usuarios de prueba, incluidos conteos, cuarentena, funciones de admin e intentos de escritura).
-  Verificar: `npm run test:rls` pasa y muestra la tabla de resultados por rol.
+  Verificar: `npm run test:rls` pasa y muestra la tabla de resultados por rol. _Por confirmar._
 - [ ] **T7. CI en GitHub Actions** (lint, typecheck, tests unitarios).
   Verificar: el último commit en GitHub muestra el check en verde.
 
