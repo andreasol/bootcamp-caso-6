@@ -43,6 +43,24 @@ describe("direct table writes are refused for signed-in users", () => {
   });
 });
 
+describe("ai_insights", () => {
+  it("cannot store an AI insight about a discrepancy outside its scope", async () => {
+    const { error } = await analyst.sb.from("ai_insights").insert({
+      run_id: crypto.randomUUID(), discrepancy_id: mxDiscrepancyId, kind: "priority",
+      model: "x", prompt_version: "x", validation_status: "valid",
+    });
+    expect(error?.code).toBe("42501");
+  });
+
+  it("cannot store an insight on behalf of another user", async () => {
+    const { error } = await analyst.sb.from("ai_insights").insert({
+      run_id: crypto.randomUUID(), discrepancy_id: null, kind: "priority", model: "x",
+      prompt_version: "x", validation_status: "error", created_by: admin.userId,
+    });
+    expect(error?.code).toBe("42501");
+  });
+});
+
 describe("review_discrepancy", () => {
   it("treats an out-of-scope id like a missing one and does not change it", async () => {
     const before = await admin.sb.from("discrepancies").select("status").eq("id", mxDiscrepancyId).single();

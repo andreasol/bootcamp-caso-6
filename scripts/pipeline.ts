@@ -94,7 +94,9 @@ async function main() {
     })),
   });
 
-  // Replace previous results (review_actions cascade with discrepancies).
+  // Replace previous results (review_actions and ai_insights cascade with discrepancies;
+  // run-level AI rows have no discrepancy, so they are cleared explicitly).
+  await wipe("ai_insights");
   await wipe("discrepancies");
   await wipe("quarantine");
   await wipe("normalized_records");
