@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { conceptLabel, formatValue, PRIORITY_LABEL, STATUS_LABEL, TYPE_LABEL } from "@/lib/format";
 import type { QueueItem } from "@/services/discrepancies";
 import { VarianceRule } from "./VarianceRule";
@@ -16,18 +17,19 @@ function Priority({ value }: { value: 1 | 2 | 3 }) {
   );
 }
 
+// The subject is the link to the detail page, so each row has one clear, keyboard-reachable target.
 function Subject({ item }: { item: QueueItem }) {
-  return item.employee ? (
+  const title = item.employee ? item.employee.fullName : (item.sourceSystemName ?? "Archivo");
+  const sub = item.employee ? `${item.employee.globalId} · ${item.country.name}` : item.country.name;
+  return (
     <>
-      <p className="font-medium">{item.employee.fullName}</p>
-      <p className="text-sm text-ink-muted">
-        {item.employee.globalId} · {item.country.name}
-      </p>
-    </>
-  ) : (
-    <>
-      <p className="font-medium">{item.sourceSystemName ?? "Archivo"}</p>
-      <p className="text-sm text-ink-muted">{item.country.name}</p>
+      <Link
+        href={`/queue/${item.id}`}
+        className="font-medium text-ink underline decoration-line underline-offset-4 hover:text-accent hover:decoration-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+      >
+        {title}
+      </Link>
+      <p className="text-sm text-ink-muted">{sub}</p>
     </>
   );
 }
