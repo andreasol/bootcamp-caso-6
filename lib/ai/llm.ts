@@ -1,4 +1,4 @@
-// The only place that talks to the LLM provider. server-only keeps the key out of any
+// The only place that talks to the LLM provider (any OpenAI-compatible API: NVIDIA NIM, OpenRouter…). server-only keeps the key out of any
 // client bundle; it is read from LLM_API_KEY (never NEXT_PUBLIC_).
 import "server-only";
 import OpenAI from "openai";
@@ -12,12 +12,12 @@ export interface LlmConfig {
 
 export function llmConfig(): LlmConfig {
   return {
-    model: process.env.LLM_MODEL || "nvidia/nemotron-3-super-120b-a12b:free",
-    timeoutMs: Number(process.env.LLM_TIMEOUT_MS) || 25_000,
+    model: process.env.LLM_MODEL || "nvidia/nemotron-3-super-120b-a12b",
+    timeoutMs: Number(process.env.LLM_TIMEOUT_MS) || 50_000,
   };
 }
 
-export function openRouterComplete(): CompleteFn {
+export function llmComplete(): CompleteFn {
   const apiKey = process.env.LLM_API_KEY;
   if (!apiKey) {
     return async () => {
@@ -26,7 +26,7 @@ export function openRouterComplete(): CompleteFn {
   }
   const client = new OpenAI({
     apiKey,
-    baseURL: process.env.LLM_BASE_URL || "https://openrouter.ai/api/v1",
+    baseURL: process.env.LLM_BASE_URL || "https://integrate.api.nvidia.com/v1",
     maxRetries: 0,
   });
   const { model } = llmConfig();
