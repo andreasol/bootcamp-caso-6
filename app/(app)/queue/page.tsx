@@ -5,8 +5,10 @@ import { AiPrioritizeButton } from "@/components/AiPrioritizeButton";
 import { ClaimRoleForm } from "@/components/ClaimRoleForm";
 import { QueueFilters } from "@/components/QueueFilters";
 import { QueueList } from "@/components/QueueList";
+import { QueueSummary } from "@/components/QueueSummary";
 import { defaultMode, FALLBACK_MESSAGE, orderQueue, type OrderMode } from "@/lib/ai/order";
 import { formatPeriod } from "@/lib/format";
+import { summarize } from "@/lib/summary";
 import type { DiscrepancyType } from "@/lib/domain/types";
 import { createClient } from "@/lib/supabase/server";
 import { logEvent } from "@/services/audit";
@@ -66,6 +68,10 @@ export default async function QueuePage({ searchParams }: PageProps<"/queue">) {
   }
 
   // AI suggestions are optional: if reading them fails, the queue still works by rules.
+  // Summary over the whole scope (all statuses, no list filters). If it fails, the list still works.
+  const scopeAll = await listQueue(supabase, {});
+  const summary = scopeAll.data ? summarize(scopeAll.data) : null;
+
   const [insightsRes, lastRun] = await Promise.all([
     listInsights(supabase, items.map((i) => i.id)),
     getLastOwnRun(supabase, profile.data.userId),
@@ -75,7 +81,6 @@ export default async function QueuePage({ searchParams }: PageProps<"/queue">) {
   const mode: OrderMode = requested === "ia" || requested === "reglas" ? requested : defaultMode(insights, items);
   const rows = orderQueue(items, insights, mode);
   const lastRunFailed = lastRun.data !== null && lastRun.data.status !== "valid";
-  const high = rows.filter((r) => r.priority === 1).length;
   const aiCount = rows.filter((r) => r.source === "ia").length;
   const orderHref = (m: OrderMode) => {
     const q = new URLSearchParams();
@@ -96,7 +101,7 @@ export default async function QueuePage({ searchParams }: PageProps<"/queue">) {
           <h1 className="mt-2 font-display text-xl font-bold [font-stretch:87.5%] md:text-2xl">
             {items.length === 0
               ? "Nada pendiente con estos filtros"
-              : `${items.length} ${items.length === 1 ? "diferencia" : "diferencias"}, ${high} de prioridad alta`}
+              : `${items.length} ${items.length === 1 ? "diferencia" : "diferencias"} en esta lista`}
           </h1>
         </div>
         <AiPrioritizeButton disabled={items.length === 0} />
@@ -132,6 +137,12 @@ export default async function QueuePage({ searchParams }: PageProps<"/queue">) {
             se muestra con el orden por reglas.
           </span>
         </p>
+      )}
+
+      {summary && summary.total > 0 && (
+        <div className="mt-8">
+          <QueueSummary summary={summary} />
+        </div>
       )}
 
       <div className="mt-8 border-y border-line py-6">
