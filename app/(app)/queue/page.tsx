@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inbox, ShieldAlert } from "lucide-react";
+import { ClaimRoleForm } from "@/components/ClaimRoleForm";
 import { QueueFilters } from "@/components/QueueFilters";
 import { QueueList } from "@/components/QueueList";
 import { formatPeriod } from "@/lib/format";
@@ -8,6 +9,7 @@ import { createClient } from "@/lib/supabase/server";
 import { logEvent } from "@/services/audit";
 import { listVisibleCountries } from "@/services/countries";
 import { DISCREPANCY_STATUSES, DISCREPANCY_TYPES, listQueue, type DiscrepancyStatus } from "@/services/discrepancies";
+import { isDemoSelfAssignEnabled } from "@/services/demo";
 import { getCurrentProfile } from "@/services/profile";
 
 export const metadata: Metadata = { title: "Cola priorizada" };
@@ -27,7 +29,7 @@ export default async function QueuePage({ searchParams }: PageProps<"/queue">) {
   const supabase = await createClient();
   const profile = await getCurrentProfile(supabase);
   if (profile.error) return <QueueError message={profile.error} />;
-  if (!profile.data) return <NoProfile />;
+  if (!profile.data) return <NoProfile canPick={await isDemoSelfAssignEnabled(supabase)} defaultName="" />;
 
   const countries = await listVisibleCountries(supabase);
   if (countries.error || !countries.data) return <QueueError message={countries.error ?? "Sin países"} />;
@@ -103,17 +105,28 @@ function EmptyQueue() {
   );
 }
 
-function NoProfile() {
+function NoProfile({ canPick, defaultName }: { canPick: boolean; defaultName: string }) {
   return (
     <main className="mx-auto max-w-2xl px-4 py-16">
       <div className="flex gap-4 border border-line bg-surface p-6">
         <ShieldAlert aria-hidden className="size-6 shrink-0 text-accent" />
-        <div>
+        <div className="min-w-0 flex-1">
           <h1 className="font-display text-lg font-semibold">Tu cuenta todavía no tiene un rol asignado</h1>
-          <p className="mt-2 text-base text-ink-muted">
-            Tu cuenta ya existe, pero sin rol no puedes ver ningún registro. Pide al administrador que te asigne un rol
-            (analista, líder regional o gerente global) y tu país o región. Después, recarga esta página.
-          </p>
+          {canPick ? (
+            <>
+              <p className="mt-2 text-base text-ink-muted">
+                Modo de revisión: elige el rol que quieres probar. El de administrador solo lo asigna otro administrador.
+              </p>
+              <div className="mt-6">
+                <ClaimRoleForm defaultName={defaultName} />
+              </div>
+            </>
+          ) : (
+            <p className="mt-2 text-base text-ink-muted">
+              Tu cuenta ya existe, pero sin rol no puedes ver ningún registro. Pide al administrador que te asigne un rol
+              (analista, líder regional o gerente global) y tu país o región. Después, recarga esta página.
+            </p>
+          )}
         </div>
       </div>
     </main>

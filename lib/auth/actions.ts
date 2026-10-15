@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { logEvent } from "@/services/audit";
+import { claimDemoRole, isDemoSelfAssignEnabled } from "@/services/demo";
+import { claimInput } from "./claim-schema";
 
 export interface SignInState {
   error: string | null;
@@ -40,6 +42,8 @@ export interface SignUpState {
   pendingConfirmation: boolean;
 }
 
+const orNull = (v: FormDataEntryValue | null) => (typeof v === "string" && v !== "" ? v : null);
+
 const signUpInput = z.object({
   fullName: z.string().trim().min(2, "Escribe tu nombre.").max(120),
   email: z.string().trim().email("Escribe un correo válido."),
@@ -74,6 +78,26 @@ export async function signUp(_prev: SignUpState, formData: FormData): Promise<Si
   if (!data.session) return { error: null, email, fullName, pendingConfirmation: true };
 
   await logEvent(supabase, { action: "sign_up", resource: "auth", result: "allowed" });
+
+  // Demo mode: the person picks a role right here. Without the flag the account stays role-less.
+  if (await isDemoSelfAssignEnabled(supabase)) {
+    const pick = claimInput.safeParse({
+      fullName: parsed.data.fullName,
+      role: formData.get("role"),
+      countryCode: orNull(formData.get("countryCode")),
+      regionCode: orNull(formData.get("regionCode")),
+    });
+    // The account already exists: if the pick is invalid, /queue offers the same choice again.
+    if (!pick.success) redirect("/queue");
+    const { role, countryCode, regionCode } = pick.data;
+    const claim = await claimDemoRole(supabase, {
+      fullName: pick.data.fullName,
+      role,
+      countryCode: role === "analyst" ? countryCode : null,
+      regionCode: role === "regional_lead" ? regionCode : null,
+    });
+    if (claim.error) redirect("/queue");
+  }
   redirect("/queue");
 }
 

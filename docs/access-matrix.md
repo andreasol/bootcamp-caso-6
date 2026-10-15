@@ -60,3 +60,13 @@ Antes de pasar por el adaptador, un registro crudo no tiene un país confiable. 
 ## Alta de cuentas
 
 Cualquiera puede crear una cuenta en `/signup`, pero nace **sin perfil**: puede iniciar sesión y no ve ningún dato (deny by default). Solo un `admin` le asigna rol y alcance desde **Usuarios**. Los jefes (`regional_lead`, `global_manager`) no asignan roles: una sola puerta de entrada, fácil de auditar.
+
+## Modo de revisión (auto-asignación de rol)
+
+Mientras `app_settings.demo_self_assign` esté en `true` (migración 007), una cuenta **sin rol** puede elegir el suyo con `rpc claim_demo_role`: analista (con país), líder regional (con región) o gerente global. **Nunca `admin`**, solo si la cuenta no tiene perfil, con alcance validado y cada intento en `audit_log`. Desactivarlo:
+
+```sql
+update public.app_settings set enabled = false where key = 'demo_self_assign';
+```
+
+Con el interruptor apagado, el alta vuelve a ser: registro abierto sin datos y rol asignado solo por un admin.

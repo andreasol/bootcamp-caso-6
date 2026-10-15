@@ -15,7 +15,7 @@ Estado posible: _por confirmar_ = construida y verificada por el agente, falta l
   Verificar: `npm run db:reset` termina con "Precisión 100.0% · Recall 100.0%"; `npm test` pasa.
 - [ ] **T4. Login y cola priorizada por reglas.** _Por confirmar._
   Verificar: `analista.cl` ve 7 filas solo de Chile; con `?country=MX` ve la cola vacía.
-- [ ] **T5. Registro de cuentas y asignación de roles por admin** (migración 005). _Por confirmar._
+- [ ] **T5. Registro de cuentas y asignación de roles por admin** (migración 005). _Por confirmar._ Incluye modo de revisión con auto-asignación de rol (migración 007).
   Verificar: una cuenta nueva en `/signup` ve "sin rol"; el admin le asigna un rol en Usuarios y la cuenta pasa a ver su alcance.
 - [ ] **T6. Tests automáticos de RLS por rol** (`tests/rls`, sesiones reales con los usuarios de prueba, incluidos conteos, cuarentena, funciones de admin e intentos de escritura).
   Verificar: `npm run test:rls` pasa y muestra la tabla de resultados por rol. _Por confirmar._
