@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
-import { Inbox, ShieldAlert } from "lucide-react";
+import Link from "next/link";
+import { AlertTriangle, Inbox, ShieldAlert } from "lucide-react";
+import { AiPrioritizeButton } from "@/components/AiPrioritizeButton";
 import { ClaimRoleForm } from "@/components/ClaimRoleForm";
 import { QueueFilters } from "@/components/QueueFilters";
 import { QueueList } from "@/components/QueueList";
+import { defaultMode, FALLBACK_MESSAGE, orderQueue, type OrderMode } from "@/lib/ai/order";
 import { formatPeriod } from "@/lib/format";
 import type { DiscrepancyType } from "@/lib/domain/types";
 import { createClient } from "@/lib/supabase/server";
@@ -10,6 +13,7 @@ import { logEvent } from "@/services/audit";
 import { listVisibleCountries } from "@/services/countries";
 import { DISCREPANCY_STATUSES, DISCREPANCY_TYPES, listQueue, type DiscrepancyStatus } from "@/services/discrepancies";
 import { isDemoSelfAssignEnabled } from "@/services/demo";
+import { getLastOwnRun, listInsights } from "@/services/insights";
 import { getCurrentProfile } from "@/services/profile";
 
 export const metadata: Metadata = { title: "Cola priorizada" };
@@ -61,7 +65,24 @@ export default async function QueuePage({ searchParams }: PageProps<"/queue">) {
     });
   }
 
-  const high = items.filter((i) => i.rulePriority === 1).length;
+  // AI suggestions are optional: if reading them fails, the queue still works by rules.
+  const [insightsRes, lastRun] = await Promise.all([
+    listInsights(supabase, items.map((i) => i.id)),
+    getLastOwnRun(supabase, profile.data.userId),
+  ]);
+  const insights = insightsRes.data ?? new Map();
+  const requested = one(sp.orden);
+  const mode: OrderMode = requested === "ia" || requested === "reglas" ? requested : defaultMode(insights, items);
+  const rows = orderQueue(items, insights, mode);
+  const lastRunFailed = lastRun.data !== null && lastRun.data.status !== "valid";
+  const high = rows.filter((r) => r.priority === 1).length;
+  const aiCount = rows.filter((r) => r.source === "ia").length;
+  const orderHref = (m: OrderMode) => {
+    const q = new URLSearchParams();
+    for (const [k, v] of Object.entries(sp)) if (k !== "orden" && typeof v === "string") q.set(k, v);
+    q.set("orden", m);
+    return `/queue?${q.toString()}`;
+  };
   const periods = [...new Set(items.map((i) => i.period))].sort();
   const closing = periods.at(-1);
 
@@ -78,17 +99,46 @@ export default async function QueuePage({ searchParams }: PageProps<"/queue">) {
               : `${items.length} ${items.length === 1 ? "diferencia" : "diferencias"}, ${high} de prioridad alta`}
           </h1>
         </div>
-        <p className="max-w-sm text-sm text-ink-muted">
-          Orden por reglas fijas: primero archivos faltantes y pagos sin registro global, luego la varianza más alta
-          frente a su umbral.
-        </p>
+        <AiPrioritizeButton disabled={items.length === 0} />
       </div>
+
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
+        <p className="max-w-xl text-sm text-ink-muted">
+          {mode === "ia" && aiCount > 0
+            ? `Orden sugerido por la IA para ${aiCount} de ${rows.length} casos. Los demás siguen las reglas fijas. Las cifras las calcula el sistema y la decisión es tuya.`
+            : "Orden por reglas fijas: primero archivos faltantes y pagos sin registro global, luego la varianza más alta frente a su umbral."}
+        </p>
+        <nav aria-label="Orden de la lista" className="flex border border-line text-sm">
+          {(["ia", "reglas"] as const).map((m) => (
+            <Link
+              key={m}
+              href={orderHref(m)}
+              aria-current={mode === m ? "true" : undefined}
+              className={`px-3 py-2 font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
+                mode === m ? "bg-ink text-white" : "text-ink-muted hover:bg-ledger"
+              }`}
+            >
+              {m === "ia" ? "Orden de la IA" : "Orden por reglas"}
+            </Link>
+          ))}
+        </nav>
+      </div>
+
+      {lastRunFailed && lastRun.data && (
+        <p role="status" className="mt-4 flex items-start gap-2 border border-variance bg-surface px-4 py-3 text-sm text-variance">
+          <AlertTriangle aria-hidden className="mt-0.5 size-4 shrink-0" />
+          <span>
+            Tu último análisis de IA no se pudo usar. {FALLBACK_MESSAGE[lastRun.data.status] ?? "La IA no respondió."} La lista
+            se muestra con el orden por reglas.
+          </span>
+        </p>
+      )}
 
       <div className="mt-8 border-y border-line py-6">
         <QueueFilters countries={countries.data} selected={{ country: countryParam, type, status: statusParam }} />
       </div>
 
-      <div className="mt-8">{items.length === 0 ? <EmptyQueue /> : <QueueList items={items} />}</div>
+      <div className="mt-8">{items.length === 0 ? <EmptyQueue /> : <QueueList rows={rows} />}</div>
     </main>
   );
 }

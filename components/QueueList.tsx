@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { Sparkles } from "lucide-react";
 import { conceptLabel, formatValue, PRIORITY_LABEL, STATUS_LABEL, TYPE_LABEL } from "@/lib/format";
+import type { QueueRow } from "@/lib/ai/order";
 import type { QueueItem } from "@/services/discrepancies";
 import { VarianceRule } from "./VarianceRule";
 
@@ -9,11 +11,24 @@ const PRIORITY_STYLE: Record<1 | 2 | 3, string> = {
   3: "border-line text-ink-muted",
 };
 
-function Priority({ value }: { value: 1 | 2 | 3 }) {
+function Priority({ row }: { row: QueueRow }) {
   return (
-    <span className={`inline-flex w-16 justify-center border px-2 py-0.5 text-sm font-medium ${PRIORITY_STYLE[value]}`}>
-      {PRIORITY_LABEL[value]}
-    </span>
+    <div className="space-y-1">
+      <span className={`inline-flex w-16 justify-center border px-2 py-0.5 text-sm font-medium ${PRIORITY_STYLE[row.priority]}`}>
+        {PRIORITY_LABEL[row.priority]}
+      </span>
+      <p className="text-sm text-ink-muted">
+        {row.source === "ia" ? (
+          <span className="inline-flex items-center gap-1 font-medium text-accent">
+            <Sparkles aria-hidden className="size-3" />
+            IA
+          </span>
+        ) : (
+          "Reglas"
+        )}
+        {row.rulesPriority && <span> · reglas: {PRIORITY_LABEL[row.rulesPriority].toLowerCase()}</span>}
+      </p>
+    </div>
   );
 }
 
@@ -34,18 +49,20 @@ function Subject({ item }: { item: QueueItem }) {
   );
 }
 
-export function QueueList({ items }: { items: QueueItem[] }) {
+export function QueueList({ rows }: { rows: QueueRow[] }) {
   return (
     <>
       {/* Mobile: stacked rows */}
       <ol className="divide-y divide-line border-y border-line bg-surface md:hidden">
-        {items.map((item) => (
+        {rows.map((row) => {
+          const item = row.item;
+          return (
           <li key={item.id} className="space-y-3 px-4 py-4">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <Subject item={item} />
               </div>
-              <Priority value={item.rulePriority} />
+              <Priority row={row} />
             </div>
             <p className="text-sm">
               <span className="font-medium">{TYPE_LABEL[item.type]}</span>
@@ -56,7 +73,8 @@ export function QueueList({ items }: { items: QueueItem[] }) {
               {item.ruleReason} · {STATUS_LABEL[item.status]}
             </p>
           </li>
-        ))}
+          );
+        })}
       </ol>
 
       {/* Tablet and desktop: ledger table */}
@@ -74,10 +92,12 @@ export function QueueList({ items }: { items: QueueItem[] }) {
             </tr>
           </thead>
           <tbody className="divide-y divide-line">
-            {items.map((item) => (
+            {rows.map((row) => {
+              const item = row.item;
+              return (
               <tr key={item.id} className="align-top hover:bg-ledger/60">
                 <td className="px-4 py-4">
-                  <Priority value={item.rulePriority} />
+                  <Priority row={row} />
                 </td>
                 <td className="px-4 py-4">
                   <Subject item={item} />
@@ -96,7 +116,8 @@ export function QueueList({ items }: { items: QueueItem[] }) {
                 </td>
                 <td className="px-4 py-4 text-sm">{STATUS_LABEL[item.status]}</td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>

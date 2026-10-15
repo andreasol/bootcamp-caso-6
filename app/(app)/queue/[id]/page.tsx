@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { ArrowLeft, SearchX } from "lucide-react";
 import { z } from "zod";
+import { AiInsightPanel } from "@/components/AiInsightPanel";
 import { DiscrepancyFacts } from "@/components/DiscrepancyFacts";
 import { ReviewForm } from "@/components/ReviewForm";
 import { ReviewHistory } from "@/components/ReviewHistory";
@@ -11,6 +12,7 @@ import { conceptLabel, formatPeriod, PRIORITY_LABEL, STATUS_LABEL, TYPE_LABEL } 
 import { createClient } from "@/lib/supabase/server";
 import { logEvent } from "@/services/audit";
 import { getDiscrepancy } from "@/services/discrepancies";
+import { getInsight } from "@/services/insights";
 import { listReviews, listSourceRecords } from "@/services/review";
 import { DetailSkeleton } from "@/components/DetailSkeleton";
 
@@ -48,9 +50,10 @@ async function Detail({ params }: { params: PageProps<"/queue/[id]">["params"] }
 
   const item = res.data;
   const recordIds = [item.localRecordId, item.globalRecordId].filter((x): x is string => x !== null);
-  const [records, reviews, { data: auth }] = await Promise.all([
+  const [records, reviews, insight, { data: auth }] = await Promise.all([
     listSourceRecords(supabase, recordIds),
     listReviews(supabase, item.id),
+    getInsight(supabase, item.id),
     supabase.auth.getUser(),
   ]);
   if (records.error || reviews.error) return <DetailError message={(records.error ?? reviews.error)!} />;
@@ -74,6 +77,8 @@ async function Detail({ params }: { params: PageProps<"/queue/[id]">["params"] }
       </header>
 
       <DiscrepancyFacts item={item} />
+
+      <AiInsightPanel insight={insight.data} rulesPriority={item.rulePriority} />
 
       <section aria-labelledby="sources-title">
         <h2 id="sources-title" className="font-display text-lg font-semibold">Registros fuente citados</h2>
