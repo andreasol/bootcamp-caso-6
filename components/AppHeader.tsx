@@ -1,6 +1,8 @@
 import { LogOut } from "lucide-react";
 import { signOut } from "@/lib/auth/actions";
 import { ROLE_LABEL } from "@/lib/format";
+import { ROLE_SEES } from "@/lib/help/content";
+import { HelpPopup } from "./HelpPopup";
 import { NavLinks } from "./NavLinks";
 import type { CurrentProfile } from "@/services/profile";
 
@@ -16,15 +18,18 @@ export function AppHeader({ profile, email }: { profile: CurrentProfile | null; 
     <header className="border-b border-line bg-surface">
       <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-3 md:px-8">
         <div className="flex items-center gap-6">
-          <p className="font-display text-base font-bold [font-stretch:87.5%]">Cola de cierre</p>
+          <p className="whitespace-nowrap font-display text-base font-bold [font-stretch:87.5%]">Cola de cierre</p>
           <NavLinks
             links={[
               { href: "/queue", label: "Cola" },
+              { href: "/tutorial", label: "Tutorial" },
+              { href: "/faq", label: "Preguntas frecuentes" },
               ...(profile?.role === "admin" ? [{ href: "/admin/users", label: "Usuarios" }] : []),
             ]}
           />
         </div>
         <div className="flex items-center gap-4">
+          <HelpPopup roleLabel={profile ? ROLE_LABEL[profile.role] : null} sees={profile ? ROLE_SEES[profile.role] : null} />
           <div className="text-right text-sm">
             <p className="font-medium">{profile?.fullName ?? email}</p>
             <p className="text-ink-muted">
