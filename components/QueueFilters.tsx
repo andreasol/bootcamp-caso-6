@@ -1,5 +1,6 @@
 // Plain GET form: filters live in the URL, so they work without client JavaScript and can be
 // shared. The server re-validates every value; a country outside the scope returns nothing.
+import Link from "next/link";
 import { STATUS_LABEL, TYPE_LABEL } from "@/lib/format";
 import { DISCREPANCY_STATUSES, DISCREPANCY_TYPES } from "@/services/discrepancies";
 import type { VisibleCountry } from "@/services/countries";
@@ -11,11 +12,15 @@ const selectClass =
 interface Props {
   countries: VisibleCountry[];
   selected: { country?: string; type?: string; status?: string };
+  // keep the chosen order (IA / reglas) when filters change
+  order?: string;
+  hasActiveFilters: boolean;
 }
 
-export function QueueFilters({ countries, selected }: Props) {
+export function QueueFilters({ countries, selected, order, hasActiveFilters }: Props) {
   return (
     <form method="get" className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-[repeat(3,minmax(0,1fr))_auto] lg:items-end">
+      {order && <input type="hidden" name="orden" value={order} />}
       {countries.length > 1 && (
         <label className="text-sm font-medium">
           País
@@ -42,7 +47,8 @@ export function QueueFilters({ countries, selected }: Props) {
       </label>
       <label className="text-sm font-medium">
         Estado
-        <select name="status" defaultValue={selected.status ?? "open"} className={selectClass}>
+        <select name="status" defaultValue={selected.status ?? "pending"} className={selectClass}>
+          <option value="pending">Pendientes (abiertas y escaladas)</option>
           <option value="all">Todos los estados</option>
           {DISCREPANCY_STATUSES.map((s) => (
             <option key={s} value={s}>
@@ -51,12 +57,22 @@ export function QueueFilters({ countries, selected }: Props) {
           ))}
         </select>
       </label>
-      <button
-        type="submit"
-        className="rounded-sm border border-accent px-4 py-2 text-sm font-medium text-accent hover:bg-accent hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-      >
-        Aplicar filtros
-      </button>
+      <div className="flex items-center gap-3">
+        <button
+          type="submit"
+          className="rounded-sm border border-accent px-4 py-2 text-sm font-medium text-accent hover:bg-accent hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+        >
+          Aplicar filtros
+        </button>
+        {hasActiveFilters && (
+          <Link
+            href={order ? `/queue?orden=${order}` : "/queue"}
+            className="text-sm font-medium text-accent underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-accent"
+          >
+            Limpiar
+          </Link>
+        )}
+      </div>
     </form>
   );
 }

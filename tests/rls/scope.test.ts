@@ -11,7 +11,7 @@ afterAll(() => {
 });
 
 describe("anonymous visitor", () => {
-  it.each(["discrepancies", "countries", "employees", "quarantine", "audit_log", "profiles"])(
+  it.each(["discrepancies", "countries", "employees", "quarantine", "audit_log", "profiles", "discrepancy_counts", "app_settings"])(
     "cannot read %s",
     async (table) => {
       const { data, error } = await anonClient().from(table).select("*").limit(1);
@@ -49,6 +49,15 @@ describe.each(ROLES)("$key ($role)", (r) => {
     record("discrepancias", rows.length, expected.discrepancies);
     expect(rows.length).toBe(expected.discrepancies);
     expect(rows.every((d) => r.countries.includes(d.country.code))).toBe(true);
+  });
+
+  it("the summary counts view adds up to exactly its discrepancies, country by country", async () => {
+    const { data, error } = await sb.from("discrepancy_counts").select("country_code, n");
+    expect(error).toBeNull();
+    const byCountry = new Map<string, number>();
+    for (const row of data ?? []) byCountry.set(row.country_code, (byCountry.get(row.country_code) ?? 0) + row.n);
+    expect([...byCountry.keys()].every((c) => r.countries.includes(c))).toBe(true);
+    expect([...byCountry.values()].reduce((a, b) => a + b, 0)).toBe(expected.discrepancies);
   });
 
   it("counts (aggregates) are limited to its scope too", async () => {

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { percent, summarize, type SummaryInput } from "@/lib/summary";
 
 const row = (over: Partial<SummaryInput> = {}): SummaryInput => ({
+  count: 1,
   status: "open",
   type: "amount_mismatch",
   rulePriority: 2,
@@ -59,6 +60,24 @@ describe("summarize", () => {
 
   it("handles an empty scope", () => {
     expect(summarize([])).toMatchObject({ total: 0, pending: 0, resolved: 0, byType: [] });
+  });
+});
+
+describe("grouped counts", () => {
+  it("weights every figure by the group's count", () => {
+    const s = summarize([
+      row({ count: 5, rulePriority: 1 }),
+      row({ count: 3, status: "escalated", rulePriority: 2, type: "missing_file" }),
+      row({ count: 4, status: "approved" }),
+    ]);
+    expect(s).toMatchObject({ total: 12, pending: 8, resolved: 4, escalated: 3, highPending: 5 });
+    expect(s.byPriority.map((b) => b.count)).toEqual([5, 3, 0]);
+    expect(s.byType.map((b) => `${b.key}:${b.count}`)).toEqual(["amount_mismatch:5", "missing_file:3"]);
+  });
+
+  it("merges groups that share a country or type", () => {
+    const s = summarize([row({ count: 2 }), row({ count: 3, rulePriority: 3 })]);
+    expect(s.byCountry).toEqual([{ key: "CL", label: "Chile", count: 5 }]);
   });
 });
 

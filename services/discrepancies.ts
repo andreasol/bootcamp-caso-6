@@ -10,6 +10,13 @@ export const DISCREPANCY_TYPES: DiscrepancyType[] = [
 ];
 export const DISCREPANCY_STATUSES = ["open", "escalated", "approved", "corrected"] as const;
 export type DiscrepancyStatus = (typeof DISCREPANCY_STATUSES)[number];
+// "pending" = still needs a person: open or escalated. It is the list's default view and matches
+// the "Pendientes" figure in the summary.
+export type StatusFilter = DiscrepancyStatus | "pending";
+export const STATUS_FILTERS: StatusFilter[] = ["pending", ...DISCREPANCY_STATUSES];
+
+// The list never loads more than this; the page tells the user when there are more.
+export const LIST_LIMIT = 200;
 
 export interface QueueItem {
   id: string;
@@ -36,7 +43,7 @@ export interface QueueItem {
 export interface QueueFilters {
   countryId?: string;
   type?: DiscrepancyType;
-  status?: DiscrepancyStatus;
+  status?: StatusFilter;
 }
 
 interface Row {
@@ -97,21 +104,24 @@ function toItem(r: Row): QueueItem {
 export async function listQueue(
   supabase: ServerSupabase,
   filters: QueueFilters,
-): Promise<{ data: QueueItem[] | null; error: string | null }> {
+): Promise<{ data: QueueItem[] | null; total: number; error: string | null }> {
   let query = supabase
     .from("discrepancies")
-    .select(SELECT)
+    .select(SELECT, { count: "exact" })
     .order("rule_priority", { ascending: true })
     .order("variance_pct", { ascending: false, nullsFirst: false })
-    .order("id");
+    .order("id")
+    .range(0, LIST_LIMIT - 1);
 
   if (filters.countryId) query = query.eq("country_id", filters.countryId);
   if (filters.type) query = query.eq("type", filters.type);
-  if (filters.status) query = query.eq("status", filters.status);
+  if (filters.status === "pending") query = query.in("status", ["open", "escalated"]);
+  else if (filters.status) query = query.eq("status", filters.status);
 
-  const { data, error } = await query;
-  if (error) return { data: null, error: error.message };
-  return { data: (data as unknown as Row[]).map(toItem), error: null };
+  const { data, count, error } = await query;
+  if (error) return { data: null, total: 0, error: error.message };
+  const items = (data as unknown as Row[]).map(toItem);
+  return { data: items, total: count ?? items.length, error: null };
 }
 
 // data is null both when the id does not exist and when it is outside the user's scope.

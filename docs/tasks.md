@@ -25,7 +25,7 @@ Estado posible: _por confirmar_ = construida y verificada por el agente, falta l
 ## Fase 2: capa de IA y pruebas adversariales
 
 - [ ] **T8. Detalle de discrepancia y revisión humana.** Valores, varianza, umbral, registros fuente; botones aprobar, corregir y escalar con comentario. _Por confirmar._
-- [ ] **T8b. Resumen tipo dashboard arriba de la cola** (pedido del usuario): totales del alcance por prioridad, tipo, estado y país, calculados por código; la lista debajo. _Por confirmar._
+- [ ] **T8b. Resumen tipo dashboard arriba de la cola** (pedido del usuario): totales del alcance por prioridad, tipo, estado y país, calculados por código; la lista debajo. _Por confirmar._ Revisada y reforzada el 2026-10-17 (vista de conteos, filtro Pendientes, tope de lista).
 - [ ] **T9. Cliente LLM en servidor** (OpenRouter, zod, validación de IDs citados, timeout, fallback) + migración `ai_insights` + auditoría de cada llamada. _Por confirmar._ Probada con NVIDIA NIM real (7 discrepancias, respuesta válida).
 - [ ] **T10. IA en la cola y en el detalle.** Prioridad sugerida con indicador IA/reglas, explicación, acción sugerida y confianza. _Por confirmar._
 - [ ] **T11. Briefing del cierre mensual** con validación de IDs y montos citados.

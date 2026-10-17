@@ -26,16 +26,20 @@ function Bars({ id, title, bars, of }: { id: string; title: string; bars: Bar[];
     <section aria-labelledby={id}>
       <h3 id={id} className="text-sm font-medium text-ink-muted">
         {title}
+        <span className="block font-normal">% sobre {of} pendientes</span>
       </h3>
       {bars.length === 0 ? (
         <p className="mt-3 text-sm text-ink-muted">Sin pendientes.</p>
       ) : (
         <ul className="mt-3 space-y-3">
           {bars.map((b) => (
-            <li key={b.key} title={`${b.count} de ${of} pendientes (${percent(b.count, of)}%)`}>
+            <li key={b.key}>
               <div className="flex items-baseline justify-between gap-3 text-sm">
                 <span>{b.label}</span>
-                <span className="font-medium tabular-nums">{b.count}</span>
+                <span className="tabular-nums">
+                  <span className="font-medium">{b.count}</span>
+                  <span className="text-ink-muted"> · {percent(b.count, of)}%</span>
+                </span>
               </div>
               <div className="mt-1 h-2 bg-line/40" aria-hidden>
                 <div className="h-2 rounded-r-[4px] bg-accent" style={{ width: `${percent(b.count, of)}%` }} />
@@ -59,10 +63,10 @@ export function QueueSummary({ summary }: { summary: Summary }) {
       </h2>
 
       <dl className="grid grid-cols-2 gap-x-6 gap-y-4 md:grid-cols-4">
-        <Figure label="Pendientes" value={pending} hint={`de ${total} en tu alcance`} />
-        <Figure label="Prioridad alta" value={highPending} hint="por reglas, entre las pendientes" />
+        <Figure label="Pendientes" value={pending} hint={`de ${total} en tu alcance (todos los estados)`} />
+        <Figure label="Prioridad alta" value={highPending} hint="de las pendientes, según las reglas" />
         <Figure label="Escaladas" value={escalated} hint="esperan otra revisión" />
-        <Figure label="Resueltas" value={resolved} hint={`${resolvedPct}% del total`} meterPct={resolvedPct} />
+        <Figure label="Resueltas" value={resolved} hint={`${resolvedPct}% de las ${total} del alcance`} meterPct={resolvedPct} />
       </dl>
 
       <div className={`mt-8 grid gap-8 ${summary.byCountry.length > 1 ? "lg:grid-cols-3" : "lg:grid-cols-2"}`}>

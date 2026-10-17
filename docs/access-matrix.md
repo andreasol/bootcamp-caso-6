@@ -34,6 +34,7 @@ El alcance se calcula una sola vez por consulta con `private.visible_country_ids
 | quarantine | ✘ | ✘ | ✘ | ★ | ✘ |
 | thresholds | default + su alcance | idem | ★ | ★ | ✘ |
 | discrepancies | ✔ | ✔ | ★ | ★ | ✘ |
+| discrepancy_counts (vista, conteos agrupados) | ✔ | ✔ | ★ | ★ | ✘ |
 | review_actions | de discrepancias visibles | idem | ★ | ★ | ✘ |
 | audit_log | ✘ | ✘ | ✘ | ★ | ✘ |
 

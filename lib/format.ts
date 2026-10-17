@@ -11,6 +11,7 @@ export const TYPE_LABEL: Record<DiscrepancyType, string> = {
 };
 
 export const STATUS_LABEL: Record<string, string> = {
+  pending: "Pendientes",
   open: "Abierta",
   escalated: "Escalada",
   approved: "Aprobada",
