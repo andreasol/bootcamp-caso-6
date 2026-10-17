@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { ShieldX, UserPlus } from "lucide-react";
 import { UserRoleForm } from "@/components/UserRoleForm";
 import { ROLE_LABEL } from "@/lib/format";
+import { publicError } from "@/lib/public-error";
 import { createClient } from "@/lib/supabase/server";
 import { logEvent } from "@/services/audit";
 import { getCurrentProfile } from "@/services/profile";
@@ -48,7 +49,7 @@ async function UsersContent() {
     return (
       <div role="alert" className="border border-variance bg-surface p-6">
         <h1 className="font-display text-lg font-semibold text-variance">No pudimos cargar las cuentas</h1>
-        <p className="mt-3 font-mono text-sm">{error}</p>
+        <p className="mt-3 font-mono text-sm">{publicError(error ?? "sin detalle")}</p>
       </div>
     );
   }

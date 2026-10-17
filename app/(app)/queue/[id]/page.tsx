@@ -8,6 +8,7 @@ import { DiscrepancyFacts } from "@/components/DiscrepancyFacts";
 import { ReviewForm } from "@/components/ReviewForm";
 import { ReviewHistory } from "@/components/ReviewHistory";
 import { SourceRecords } from "@/components/SourceRecords";
+import { publicError } from "@/lib/public-error";
 import { conceptLabel, formatPeriod, PRIORITY_LABEL, STATUS_LABEL, TYPE_LABEL } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { logEvent } from "@/services/audit";
@@ -41,7 +42,7 @@ async function Detail({ params }: { params: PageProps<"/queue/[id]">["params"] }
   const valid = z.string().uuid().safeParse(id).success;
   const res = valid ? await getDiscrepancy(supabase, id) : { data: null, error: null };
 
-  if (res.error) return <DetailError message={res.error} />;
+  if (res.error) return <DetailError message={publicError(res.error)} />;
   if (!res.data) {
     // Same answer for "does not exist" and "outside your scope": nothing is revealed.
     await logEvent(supabase, { action: "view_discrepancy", resource: "discrepancies", resourceId: id, result: "denied", reason: "not found or out of scope" });
@@ -56,7 +57,7 @@ async function Detail({ params }: { params: PageProps<"/queue/[id]">["params"] }
     getInsight(supabase, item.id),
     supabase.auth.getUser(),
   ]);
-  if (records.error || reviews.error) return <DetailError message={(records.error ?? reviews.error)!} />;
+  if (records.error || reviews.error) return <DetailError message={publicError((records.error ?? reviews.error)!)} />;
   await logEvent(supabase, { action: "view_discrepancy", resource: "discrepancies", resourceId: id, result: "allowed" });
 
   const subject = item.employee ? `${item.employee.fullName} · ${item.employee.globalId}` : (item.sourceSystemName ?? "Archivo");

@@ -1,3 +1,4 @@
+import { publicError } from "@/lib/public-error";
 import type { ServerSupabase } from "@/lib/supabase/server";
 import type { AppRole } from "./profile";
 
@@ -53,12 +54,12 @@ export async function assignRole(
     p_country_code: input.countryCode,
     p_region_code: input.regionCode,
   });
-  if (error) return { error: error.message };
+  if (error) return { error: publicError(error.message) };
   return { error: (data as string | null) ?? null };
 }
 
 export async function revokeRole(supabase: ServerSupabase, userId: string): Promise<{ error: string | null }> {
   const { data, error } = await supabase.rpc("admin_revoke_role", { p_user_id: userId });
-  if (error) return { error: error.message };
+  if (error) return { error: publicError(error.message) };
   return { error: (data as string | null) ?? null };
 }

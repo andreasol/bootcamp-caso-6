@@ -2,7 +2,7 @@
 // review function on someone else's row, or by giving themselves a role.
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { signIn } from "./helpers";
+import { anonClient, signIn } from "./helpers";
 
 let analyst: { sb: SupabaseClient; userId: string };
 let analystMx: { sb: SupabaseClient; userId: string };
@@ -40,6 +40,32 @@ describe("direct table writes are refused for signed-in users", () => {
   it("cannot forge or erase audit entries", async () => {
     const ins = await analyst.sb.from("audit_log").insert({ action: "x", resource: "x", result: "allowed" });
     expect(ins.error?.code).toBe("42501");
+  });
+});
+
+describe("AI rate limit (ai_try_start)", () => {
+  it("is refused for anonymous callers", async () => {
+    const { data, error } = await anonClient().rpc("ai_try_start", { p_cooldown_seconds: 60 });
+    expect(data).toBeNull();
+    expect(error?.code).toBe("42501");
+  });
+
+  it("lets at most one of several simultaneous requests through", async () => {
+    // Wait out any earlier run so the burst starts from a clean slate, then fire 6 at once.
+    await analystMx.sb.rpc("ai_try_start", { p_cooldown_seconds: 1 });
+    // the wait must be at least as long as the cooldown used in the burst below
+    await new Promise((r) => setTimeout(r, 1300));
+    const results = await Promise.all(Array.from({ length: 6 }, () => analystMx.sb.rpc("ai_try_start", { p_cooldown_seconds: 1 })));
+    const values = results.map((r) => r.data as number);
+    expect(values.filter((v) => v === 0)).toHaveLength(1);
+    expect(values.filter((v) => v > 0 && v <= 1)).toHaveLength(5);
+  });
+
+  it("cannot read or reset the limits table directly", async () => {
+    const read = await analystMx.sb.from("ai_rate_limits").select("*");
+    expect(read.data ?? []).toEqual([]);
+    const reset = await analystMx.sb.from("ai_rate_limits").delete().not("user_id", "is", null);
+    expect(reset.error?.code).toBe("42501");
   });
 });
 

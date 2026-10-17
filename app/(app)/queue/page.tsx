@@ -7,6 +7,7 @@ import { QueueSummary } from "@/components/QueueSummary";
 import { defaultMode, orderQueue, type OrderMode } from "@/lib/ai/order";
 import type { DiscrepancyType } from "@/lib/domain/types";
 import { formatPeriod } from "@/lib/format";
+import { publicError } from "@/lib/public-error";
 import { summarize } from "@/lib/summary";
 import { createClient } from "@/lib/supabase/server";
 import { logEvent } from "@/services/audit";
@@ -34,14 +35,14 @@ export default async function QueuePage({ searchParams }: PageProps<"/queue">) {
 
   const supabase = await createClient();
   const profile = await getCurrentProfile(supabase);
-  if (profile.error) return <QueueError message={profile.error} />;
+  if (profile.error) return <QueueError message={publicError(profile.error)} />;
   if (!profile.data) return <NoProfile canPick={await isDemoSelfAssignEnabled(supabase)} defaultName="" />;
 
   // The summary does not depend on the list, so it loads in parallel with it.
   const summaryRequest = listCounts(supabase);
 
   const countries = await listVisibleCountries(supabase);
-  if (countries.error || !countries.data) return <QueueError message={countries.error ?? "Sin países"} />;
+  if (countries.error || !countries.data) return <QueueError message={publicError(countries.error ?? "Sin países")} />;
 
   // A country outside the user's scope gets the same empty answer as a country with no rows.
   // RLS would return nothing anyway; this check only leaves evidence of the attempt.
@@ -52,7 +53,7 @@ export default async function QueuePage({ searchParams }: PageProps<"/queue">) {
   let total = 0;
   if (!outOfScope) {
     const res = await listQueue(supabase, { countryId: country?.id, type, status });
-    if (res.error || !res.data) return <QueueError message={res.error ?? "Respuesta vacía"} />;
+    if (res.error || !res.data) return <QueueError message={publicError(res.error ?? "Respuesta vacía")} />;
     items = res.data;
     total = res.total;
   }
@@ -113,7 +114,7 @@ export default async function QueuePage({ searchParams }: PageProps<"/queue">) {
         {summary ? (
           summary.total > 0 && <QueueSummary summary={summary} />
         ) : (
-          <SummaryUnavailable message={counts.error ?? "sin detalle"} />
+          <SummaryUnavailable message={publicError(counts.error ?? "sin detalle")} />
         )}
       </div>
 
