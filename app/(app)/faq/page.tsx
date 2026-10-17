@@ -23,7 +23,7 @@ export default function FaqPage() {
         {FAQ_GROUPS.map((g) => (
           <a
             key={g.title}
-            href={`#${slug(g.title)}`}
+            href={`#${g.id}`}
             className="border border-line px-3 py-1.5 text-sm text-ink-muted hover:border-accent hover:text-accent focus-visible:outline-2 focus-visible:outline-accent"
           >
             {g.title}
@@ -32,8 +32,8 @@ export default function FaqPage() {
       </nav>
 
       {FAQ_GROUPS.map((group) => (
-        <section key={group.title} id={slug(group.title)} aria-labelledby={`${slug(group.title)}-title`} className="mt-12 scroll-mt-6">
-          <h2 id={`${slug(group.title)}-title`} className="font-display text-lg font-semibold">
+        <section key={group.title} id={group.id} aria-labelledby={`${group.id}-title`} className="mt-12 scroll-mt-6">
+          <h2 id={`${group.id}-title`} className="font-display text-lg font-semibold">
             {group.title}
           </h2>
           <div className="mt-3 border-t border-line">
@@ -61,10 +61,3 @@ export default function FaqPage() {
   );
 }
 
-const slug = (title: string) =>
-  title
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");

@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { isActive } from "@/lib/nav";
 
 export function NavLinks({ links }: { links: { href: string; label: string }[] }) {
   const pathname = usePathname();
   return (
-    <nav aria-label="Secciones" className="flex flex-wrap gap-1">
+    <nav aria-label="Secciones" className="flex gap-1 whitespace-nowrap">
       {links.map((l) => {
-        const active = pathname.startsWith(l.href);
+        const active = isActive(pathname, l.href);
         return (
           <Link
             key={l.href}

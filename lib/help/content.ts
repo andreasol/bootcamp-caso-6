@@ -1,7 +1,11 @@
 // Help copy shared by the "?" popup, the tutorial and the FAQ, so the three never disagree.
 // Plain Spanish, specific to this product. Facts here mirror docs/design.md and the database
 // rules: if a rule changes there, change it here too.
+import { AI_WAIT_RANGE } from "@/lib/ai/constants";
+import { HIGH_PRIORITY_MULTIPLE } from "@/lib/discrepancies/priority";
 import type { DiscrepancyType } from "@/lib/domain/types";
+import { TYPE_LABEL } from "@/lib/format";
+import { slug } from "./slug";
 import type { AppRole } from "@/services/profile";
 
 export const TYPE_GLOSSARY: Record<DiscrepancyType, { means: string; action: string }> = {
@@ -26,6 +30,11 @@ export const TYPE_GLOSSARY: Record<DiscrepancyType, { means: string; action: str
     action: "Pide el archivo al país o al proveedor de su sistema.",
   },
 };
+
+const COUNT_WORDS = ["cero", "uno", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho", "nueve", "diez"];
+// Number of discrepancy types, spelled out, so adding a type updates the copy by itself.
+export const TYPE_COUNT = Object.keys(TYPE_LABEL).length;
+const typeCountWord = COUNT_WORDS[TYPE_COUNT] ?? String(TYPE_COUNT);
 
 export interface TutorialStep {
   title: string;
@@ -55,7 +64,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
   },
   {
     title: "Pide ayuda a la IA (opcional)",
-    body: "En la cola, pulsa «Priorizar con IA». Tarda entre 30 y 40 segundos. Después cada fila muestra si su prioridad viene de la IA o de las reglas, y en el detalle aparece una explicación, una acción sugerida y qué tan segura está la IA.",
+    body: `En la cola, pulsa «Priorizar con IA». Tarda ${AI_WAIT_RANGE}. Después cada fila muestra si su prioridad viene de la IA o de las reglas, y en el detalle aparece una explicación, una acción sugerida y qué tan segura está la IA.`,
     tip: "Si la IA falla o responde algo inválido, la lista sigue ordenada por reglas y la pantalla te lo avisa.",
   },
   {
@@ -73,11 +82,12 @@ export interface FaqItem {
 }
 
 export interface FaqGroup {
+  id: string;
   title: string;
   items: FaqItem[];
 }
 
-export const FAQ_GROUPS: FaqGroup[] = [
+const RAW_FAQ_GROUPS: Omit<FaqGroup, "id">[] = [
   {
     title: "Uso diario",
     items: [
@@ -93,7 +103,7 @@ export const FAQ_GROUPS: FaqGroup[] = [
         id: "tipos",
         q: "¿Qué tipos de diferencia existen?",
         a: [
-          "Hay cinco: monto distinto, saldo de vacaciones distinto, falta en el sistema global, falta en el sistema local y archivo no recibido. En el Tutorial hay una tabla que explica qué significa cada una y qué hacer.",
+          `Hay ${typeCountWord}: monto distinto, saldo de vacaciones distinto, falta en el sistema global, falta en el sistema local y archivo no recibido. En el Tutorial hay una tabla que explica qué significa cada una y qué hacer.`,
         ],
       },
       {
@@ -107,9 +117,9 @@ export const FAQ_GROUPS: FaqGroup[] = [
         id: "prioridad-reglas",
         q: "¿Cómo se decide la prioridad por reglas?",
         a: [
-          "Alta: falta un archivo, hay un pago local sin registro global, o la varianza es 3 veces el umbral o más.",
-          "Media: monto distinto por debajo de 3 veces el umbral, registro que falta en el sistema local, o saldo de vacaciones local sin registro global.",
-          "Baja: saldo de vacaciones distinto por debajo de 3 veces el umbral, porque no bloquea el pago.",
+          `Alta: falta un archivo, hay un pago local sin registro global, o la varianza es ${HIGH_PRIORITY_MULTIPLE} veces el umbral o más.`,
+          `Media: monto distinto por debajo de ${HIGH_PRIORITY_MULTIPLE} veces el umbral, registro que falta en el sistema local, o saldo de vacaciones local sin registro global.`,
+          `Baja: saldo de vacaciones distinto por debajo de ${HIGH_PRIORITY_MULTIPLE} veces el umbral, porque no bloquea el pago.`,
         ],
       },
       {
@@ -167,7 +177,7 @@ export const FAQ_GROUPS: FaqGroup[] = [
         id: "ia-tarda",
         q: "¿Por qué «Priorizar con IA» tarda tanto?",
         a: [
-          "El modelo analiza todos los casos abiertos de tu alcance y suele tardar entre 30 y 40 segundos. Mientras tanto la lista sigue disponible, ordenada por reglas.",
+          `El modelo analiza todos los casos abiertos de tu alcance y suele tardar ${AI_WAIT_RANGE}. Mientras tanto la lista sigue disponible, ordenada por reglas.`,
         ],
       },
     ],
@@ -226,6 +236,8 @@ export const FAQ_GROUPS: FaqGroup[] = [
     ],
   },
 ];
+
+export const FAQ_GROUPS: FaqGroup[] = RAW_FAQ_GROUPS.map((g) => ({ ...g, id: slug(g.title) }));
 
 export const ROLE_TABLE: { role: AppRole; label: string; sees: string; can: string }[] = [
   { role: "analyst", label: "Analista", sees: "Solo su país", can: "Revisar y decidir sobre los casos de su país" },

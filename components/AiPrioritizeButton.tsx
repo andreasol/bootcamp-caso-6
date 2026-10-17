@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { AlertTriangle, CheckCircle2, LoaderCircle, Sparkles } from "lucide-react";
+import { AI_MAX_WAIT } from "@/lib/ai/constants";
 import { FALLBACK_MESSAGE } from "@/lib/ai/order";
 
 type Outcome =
@@ -64,7 +65,7 @@ export function AiPrioritizeButton({ disabled = false }: { disabled?: boolean })
       </button>
 
       <div aria-live="polite" className="max-w-sm text-sm">
-        {busy && <p className="text-ink-muted">Puede tardar hasta 40 segundos. La lista sigue ordenada por reglas mientras tanto.</p>}
+        {busy && <p className="text-ink-muted">Puede tardar {AI_MAX_WAIT}. La lista sigue ordenada por reglas mientras tanto.</p>}
         {outcome.kind === "ok" && (
           <p className="flex items-start gap-2 text-accent">
             <CheckCircle2 aria-hidden className="mt-0.5 size-4 shrink-0" />

@@ -2,6 +2,9 @@
 // the fallback whenever the AI ranking is unavailable or invalid.
 import type { DiscrepancyType, Unit } from "@/lib/domain/types";
 
+// A variance this many times the threshold (or more) is high priority. Shared with the help copy.
+export const HIGH_PRIORITY_MULTIPLE = 3;
+
 export interface PriorityInput {
   type: DiscrepancyType;
   unit: Unit | null;
@@ -25,8 +28,8 @@ export function rulePriority({ type, unit, thresholdMultiple }: PriorityInput): 
     return { priority: 2, reason: "Registro global sin contraparte local" };
   }
   const multiple = thresholdMultiple ?? 0;
-  if (multiple >= 3) {
-    return { priority: 1, reason: `Varianza de ${multiple.toFixed(1)}× el umbral (≥ 3×)` };
+  if (multiple >= HIGH_PRIORITY_MULTIPLE) {
+    return { priority: 1, reason: `Varianza de ${multiple.toFixed(1)}× el umbral (≥ ${HIGH_PRIORITY_MULTIPLE}×)` };
   }
   if (type === "amount_mismatch") {
     return { priority: 2, reason: `Varianza de ${multiple.toFixed(1)}× el umbral` };

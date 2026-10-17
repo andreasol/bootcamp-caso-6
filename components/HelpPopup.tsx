@@ -1,7 +1,8 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { BookOpen, CircleHelp, MessageCircleQuestion, X } from "lucide-react";
 
 interface Props {
@@ -16,7 +17,21 @@ const linkClass =
 // Native <dialog>: focus trap, Escape to close and screen-reader semantics come with it.
 export function HelpPopup({ roleLabel, sees }: Props) {
   const ref = useRef<HTMLDialogElement>(null);
+  const pressedOnBackdrop = useRef(false);
+  const pathname = usePathname();
   const close = () => ref.current?.close();
+
+  // The header stays mounted across navigation, so close the dialog whenever the page changes
+  // (a link inside it, or the browser's Back button).
+  useEffect(() => {
+    if (ref.current?.open) ref.current.close();
+  }, [pathname]);
+
+  // True when the pointer is outside the dialog box, i.e. over the dimmed backdrop.
+  const isOutside = (e: React.MouseEvent<HTMLDialogElement>) => {
+    const box = ref.current?.getBoundingClientRect();
+    return !box || e.clientX < box.left || e.clientX > box.right || e.clientY < box.top || e.clientY > box.bottom;
+  };
 
   return (
     <>
@@ -34,8 +49,15 @@ export function HelpPopup({ roleLabel, sees }: Props) {
       <dialog
         ref={ref}
         aria-labelledby="help-title"
-        // a click on the backdrop (the dialog element itself) closes it
-        onClick={(e) => e.target === ref.current && close()}
+        // Closes only on a full click on the backdrop: pressed AND released outside the box. Selecting
+        // text inside and letting go over the backdrop must not close it.
+        onMouseDown={(e) => {
+          pressedOnBackdrop.current = e.target === ref.current && isOutside(e);
+        }}
+        onClick={(e) => {
+          if (pressedOnBackdrop.current && e.target === ref.current && isOutside(e)) close();
+          pressedOnBackdrop.current = false;
+        }}
         className="m-auto w-[calc(100%-2rem)] max-w-lg border border-line bg-surface p-0 text-ink backdrop:bg-ink/40"
       >
         <div className="max-h-[85vh] overflow-y-auto p-6">
